@@ -28,7 +28,7 @@ export default function RootLayout({
         >
           <WalletProvider>
             <TokenProvider>
-              {children}
+                {children}
             </TokenProvider>
           </WalletProvider>
         </ThemeProvider>

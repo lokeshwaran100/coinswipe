@@ -6,25 +6,38 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { useTokens } from '@/components/providers/token-provider'
 import { TokenCard } from '@/components/ui/token-card'
-import { mockTokens } from '@/lib/mock-data'
 
 export function SwipePage({ category }: { category: string }) {
   const router = useRouter()
-  const { addToken, defaultAmount } = useTokens()
+  const { addToken, defaultAmount, uniswapPairs, loading, error } = useTokens()
   const [currentIndex, setCurrentIndex] = useState(0)
   const controls = useAnimation()
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+  if (!uniswapPairs.length) return <div>No tokens found</div>
+
+  const buy = (currentIndex: number) => {
+    console.log("token bought", uniswapPairs[currentIndex]);
+  }
+
+  const skip = (currentIndex: number) => {
+    console.log("token skipped", uniswapPairs[currentIndex]);
+  }
 
   const handleDragEnd = async (event: any, info: PanInfo) => {
     const threshold = 100
     if (Math.abs(info.offset.x) > threshold) {
       if (info.offset.x > 0) {
         await controls.start({ x: 500, opacity: 0 })
-        addToken({ ...mockTokens[currentIndex], amount: defaultAmount })
+        addToken({ ...uniswapPairs[currentIndex], amount: defaultAmount })
+        buy(currentIndex);
       } else {
         await controls.start({ x: -500, opacity: 0 })
+        skip(currentIndex)
       }
       controls.set({ x: 0, opacity: 1 })
-      setCurrentIndex(prev => (prev + 1) % mockTokens.length)
+      setCurrentIndex(prev => (prev + 1) % uniswapPairs.length)
     } else {
       controls.start({ x: 0, opacity: 1 })
     }
@@ -55,7 +68,7 @@ export function SwipePage({ category }: { category: string }) {
           animate={controls}
           className="touch-none"
         >
-          <TokenCard token={mockTokens[currentIndex]} />
+          <TokenCard token={uniswapPairs[currentIndex]} />
         </motion.div>
       </div>
     </div>
