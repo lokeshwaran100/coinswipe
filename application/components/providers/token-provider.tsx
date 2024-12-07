@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 export interface TokenProfile {
   url: string;
@@ -17,46 +17,19 @@ export interface TokenProfile {
 }
 
 export interface TokenPair {
-  chainId: string;
-  dexId: string;
-  url: string;
-  pairAddress: string;
-  labels: string[];
   baseToken: {
     address: string;
     name: string;
     symbol: string;
   };
-  quoteToken: {
-    address: string;
-    name: string;
-    symbol: string;
-  };
-  priceNative: string;
   priceUsd: string;
   priceChange: {
     h24: string;
   };
-  liquidity: {
-    usd: number;
-    base: number;
-    quote: number;
-  };
-  fdv: number;
-  marketCap: number;
-  pairCreatedAt: number;
   info: {
     imageUrl: string;
-    websites: { url: string }[];
-    socials: {
-      platform: string;
-      handle: string;
-    }[];
   };
-  boosts: {
-    active: number;
-  };
-  amount?: string; // Added for saved tokens
+  amount?: string; // Keeping this for saved tokens functionality
 }
 
 interface TokenContextType {
@@ -90,11 +63,70 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   const [savedTokens, setSavedTokens] = useState<TokenPair[]>([])
   const [defaultAmount, setDefaultAmount] = useState('0.1')
   
-  // Application state
-  const [tokenProfiles, setTokenProfiles] = useState<TokenProfile[]>([]);
-  const [baseTokenAddresses, setBaseTokenAddresses] = useState<string[]>([]);
-  const [uniswapPairs, setUniswapPairs] = useState<TokenPair[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Application state withdummy data
+  const [tokenProfiles] = useState<TokenProfile[]>([
+    {
+      url: "https://dexscreener.com/base/sample",
+      chainId: "base",
+      tokenAddress: "0x123...",
+      icon: "/sample-icon.png",
+      header: "Sample Token",
+      description: "A sample token for testing",
+      links: [
+        {
+          type: "website",
+          label: "Website",
+          url: "https://example.com"
+        }
+      ]
+    }
+  ]);
+
+  const [uniswapPairs] = useState<TokenPair[]>([
+    {
+      baseToken: {
+        address: "0x123",
+        name: "Ethereum",
+        symbol: "ETH"
+      },
+      priceUsd: "3,456.20",
+      priceChange: {
+        h24: "2.5"
+      },
+      info: {
+        imageUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png"
+      }
+    },
+    {
+      baseToken: {
+        address: "0x456",
+        name: "Bitcoin",
+        symbol: "BTC"
+      },
+      priceUsd: "52,380.75",
+      priceChange: {
+        h24: "-1.2"
+      },
+      info: {
+        imageUrl: "https://bitcoin.org/img/icons/opengraph.png"
+      }
+    },
+    {
+      baseToken: {
+        address: "0x789",
+        name: "Cardano",
+        symbol: "ADA"
+      },
+      priceUsd: "0.58",
+      priceChange: {
+        h24: "3.7"
+      },
+      info: {
+        imageUrl: "https://cryptologos.cc/logos/cardano-ada-logo.png"
+      }
+    }
+  ] as TokenPair[]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const addToken = (token: TokenPair) => {
@@ -105,67 +137,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     setSavedTokens(prev => prev.filter(token => token.baseToken.address !== address))
   }
 
-  // Fetch token profiles
-  useEffect(() => {
-    const fetchTokenProfiles = async () => {
-      try {
-        const response = await fetch(
-          "https://api.dexscreener.com/token-profiles/latest/v1"
-        );
-        const data = await response.json();
-
-        console.log("data from https://api.dexscreener.com/token-profiles/latest/v1", data);
-
-        const baseProfiles = data.filter(
-          (profile: TokenProfile) => profile.chainId === "base"
-        );
-        setTokenProfiles(baseProfiles);
-
-        const addresses = baseProfiles.map(
-          (profile: TokenProfile) => profile.tokenAddress
-        );
-        setBaseTokenAddresses(addresses);
-      } catch (err) {
-        console.error("Error fetching token profiles:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch token profiles"
-        );
-      }
-    };
-
-    fetchTokenProfiles();
-  }, []);
-
-  // Fetch token pairs
-  useEffect(() => {
-    const fetchTokenPairs = async () => {
-      if (!baseTokenAddresses.length) return;
-
-      try {
-        const addressesString = baseTokenAddresses.join(",");
-        const response = await fetch(
-          `https://api.dexscreener.com/latest/dex/tokens/${addressesString}`
-        );
-        const data = await response.json();
-
-        console.log("data from https://api.dexscreener.com/latest/dex/tokens", data);
-
-        const uniswapPairsData = data.pairs.filter(
-          (pair: TokenPair) => pair.dexId === "uniswap"
-        );
-        setUniswapPairs(uniswapPairsData);
-      } catch (err) {
-        console.error("Error fetching token pairs:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch token pairs"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTokenPairs();
-  }, [baseTokenAddresses]);
+  // Remove the useEffect hooks that were fetching data
 
   return (
     <TokenContext.Provider value={{
