@@ -42,43 +42,7 @@ export async function POST(request: Request) {
     // const faucetTransaction = await wallet.faucet();
     // console.log(`Faucet transaction: ${faucetTransaction}`);
 
-    // let address2 = await wallet.createAddress();
-    // console.log(`Address: ${address2}`);
-    // Contract details
-    const contractAddress = "0xB6DeCA2418Fa4E21ffCf605f8E38a06D0A791bF5";
-    const buyMethod = "swapETHToToken";
-    const approve = "";
-    const sellMethod = "";
-
-    // const buyMethodAbi =
-
-    // ABI for the function
-    const abi = [
-      {
-        inputs: [],
-        name: "feeCollectionAddress",
-        outputs: [
-          {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ];
-    // const depositInvocation = await wallet.invokeContract({
-    //   contractAddress: "0x4200000000000000000000000000000000000006",
-    //   method: "deposit",
-    //   args: {
-    //     deposit: "0.0001",
-    //   },
-    //   abi: ,
-    //   // amount: 1000000000000,
-    // });
-
-    const approveInvocation = await wallet.invokeContract({
+      const approveInvocation = await wallet.invokeContract({
       contractAddress: "0x4200000000000000000000000000000000000006",
       method: "approve",
       args: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, PanInfo, useAnimation } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
@@ -9,34 +9,50 @@ import { TokenCard } from "@/components/ui/token-card";
 
 export function SwipePage({ category }: { category: string }) {
   const router = useRouter();
-  const { addToken, defaultAmount, uniswapPairs, loading, error } = useTokens();
+  const { 
+    addToken, 
+    defaultAmount, 
+    uniswapPairs, 
+    loading, 
+    error,
+    hasMoreTokens,
+    fetchMoreTokens 
+  } = useTokens();
   const [currentIndex, setCurrentIndex] = useState(0);
   const controls = useAnimation();
 
-  if (loading) return <div>Loading...</div>;
+  // Background fetching of more tokens
+  useEffect(() => {
+    if (currentIndex >= uniswapPairs.length - 5 && hasMoreTokens) {
+      fetchMoreTokens();
+    }
+  }, [currentIndex, uniswapPairs.length, hasMoreTokens, fetchMoreTokens]);
+
+  // Only show initial loading state
+  if (!uniswapPairs.length && loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
   if (!uniswapPairs.length) return <div>No tokens found</div>;
 
   const buy = async (currentIndex: number) => {
-    try {
-      const response = await fetch("/api/fetch-wallet", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    // try {
+    //   const response = await fetch("/api/fetch-wallet", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
 
-      const data = await response.json();
+    //   const data = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error || "Contract call failed");
-      }
+    //   if (!data.success) {
+    //     throw new Error(data.error || "Contract call failed");
+    //   }
 
-      // Update wallet data with contract call results
-      console.log(data);
-    } catch (err) {
-      console.error("Error calling contract:", err);
-    }
+    //   // Update wallet data with contract call results
+    //   console.log(data);
+    // } catch (err) {
+    //   console.error("Error calling contract:", err);
+    // }
     console.log("token bought", uniswapPairs[currentIndex]);
   };
 
@@ -56,11 +72,19 @@ export function SwipePage({ category }: { category: string }) {
         skip(currentIndex);
       }
       controls.set({ x: 0, opacity: 1 });
-      setCurrentIndex((prev) => (prev + 1) % uniswapPairs.length);
+      
+      // Only increment if we have more tokens
+      if (currentIndex < uniswapPairs.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+      }
     } else {
       controls.start({ x: 0, opacity: 1 });
     }
   };
+
+  // Ensure we have a token to display
+  const currentToken = uniswapPairs[currentIndex];
+  if (!currentToken) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
@@ -87,7 +111,7 @@ export function SwipePage({ category }: { category: string }) {
           animate={controls}
           className="touch-none"
         >
-          <TokenCard token={uniswapPairs[currentIndex]} />
+          <TokenCard token={currentToken} />
         </motion.div>
       </div>
     </div>
