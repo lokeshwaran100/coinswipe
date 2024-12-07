@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "justswipesubgraph": {
+      "address": "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
+      "startBlock": 18903949
+    }
+  }
+}
