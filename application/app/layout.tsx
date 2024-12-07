@@ -31,7 +31,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Providers session={session}>
+          <Providers session={session?session:null}>
             <TokenProvider>
               {children}
               <Toaster />

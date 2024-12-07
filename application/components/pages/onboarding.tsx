@@ -5,35 +5,41 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { signIn, useSession, signOut } from 'next-auth/react'
 import { ArrowRight, LogIn } from 'lucide-react'
+import { createUser } from '@/lib/dbOperations'
 
 export function OnboardingPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
   const [defaultAmount, setDefaultAmount] = useState('')
   const [walletAddress, setWalletAddress] = useState('')
 
   useEffect(() => {
+    console.log(session);
     // Check if user is authenticated and has email
     if (status === 'authenticated' && session?.user?.email) {
+      const initUser = async () => {
+        await createUser(session?.user?.email as string);
+      };
+      initUser();
       // Call the wallet API with email as query parameter
-      fetch(`/api/wallet?email=${encodeURIComponent(session.user.email)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            setWalletAddress(data.data.walletAddress)
-          } else {
-            console.error('Failed to create/fetch wallet:', data.error)
-          }
-        })
-        .catch(error => {
-          console.error('Error accessing wallet API:', error);
-          signOut();
-        })
+      // fetch(`/api/wallet?email=${encodeURIComponent(session.user.email)}`, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   }
+      // })
+      //   .then(res => res.json())
+      //   .then(data => {
+      //     if (data.success) {
+      //       setWalletAddress(data.data.walletAddress)
+      //     } else {
+      //       console.error('Failed to create/fetch wallet:', data.error)
+      //     }
+      //   })
+      //   .catch(error => {
+      //     console.error('Error accessing wallet API:', error);
+      //     signOut();
+      //   })
     }
   }, [session, status])
 

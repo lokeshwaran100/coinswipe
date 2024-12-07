@@ -1,15 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useTokens } from "@/components/providers/token-provider";
 import { PortfolioCard } from "@/components/ui/portfolio-card";
 import { Settings } from "lucide-react";
+import { getUserDetails } from "@/lib/dbOperations";
+import { useSession } from "next-auth/react";
 
 export function PortfolioPage() {
+  const { data: session, status } = useSession();
+  const [portfolio,setPortfolio] = useState<any>([]);
+
   const { savedTokens, tokenProfiles, defaultAmount, setDefaultAmount } =
     useTokens();
-  const [inputValue, setInputValue] = useState<String>(defaultAmount);
 
+    useEffect(()=>{
+      if (status === 'authenticated' && session?.user?.email) {
+        const fetchPortfolio = async()=>{
+          const userDetails = await getUserDetails(session?.user?.email as string);
+          setPortfolio(userDetails.portfolio);
+        }
+        fetchPortfolio();
+      }
+    },[session, status]);
+  const [inputValue, setInputValue] = useState<string>(defaultAmount);
+  
+  if(status!=="authenticated")
+    {
+      return <div>please sign in to view your portfolio</div>;
+    }
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
       <div className="max-w-1xl mx-auto space-y-8">
@@ -35,7 +54,7 @@ export function PortfolioPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {tokenProfiles.map((token, index) => (
+          {portfolio.map((token:any, index:number) => (
             <motion.div
               key={token.tokenAddress}
               initial={{ opacity: 0, y: 20 }}
@@ -44,20 +63,20 @@ export function PortfolioPage() {
             >
               <PortfolioCard
                 token={{
-                  address: token.tokenAddress,
-                  name: token.tokenAddress,
-                  symbol: token.tokenAddress,
+                  address: token.address,
+                  name: token.name,
+                  symbol: "",
                   price: 0,
                   priceChange: 0,
-                  image: token.icon,
-                  amount: "0",
+                  image: token.imageUrl,
+                  amount: token.amount,
                 }}
               />
             </motion.div>
           ))}
         </div>
 
-        {tokenProfiles.length === 0 && (
+        {portfolio.length === 0 && (
           <div className="text-center text-muted-foreground py-12">
             No tokens in your portfolio yet. Start swiping to add some!
           </div>

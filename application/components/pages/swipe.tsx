@@ -7,7 +7,11 @@ import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useTokens } from "@/components/providers/token-provider";
 import { TokenCard } from "@/components/ui/token-card";
 import { useToast } from "@/hooks/use-toast";
+import { addCoinToPortfolio } from "@/lib/dbOperations";
+import { useSession } from "next-auth/react";
+
 export function SwipePage({ category }: { category: string }) {
+  const { data: session, status } = useSession();
   const {toast} = useToast();
   const router = useRouter();
   const { 
@@ -51,6 +55,7 @@ export function SwipePage({ category }: { category: string }) {
 
       // // Update wallet data with contract call results
       // console.log(data);
+      await addCoinToPortfolio(session?.user?.email as string, uniswapPairs[currentIndex]);
       toast({
         title: "Token bought",
         description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,
