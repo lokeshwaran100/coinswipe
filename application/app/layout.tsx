@@ -14,12 +14,13 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://justswipe.example.com'),
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await getSession();
+  let session; 
+  getSession().then((data)=>{session= data}).catch(err=>console.log(err));
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
