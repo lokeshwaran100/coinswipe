@@ -1,10 +1,11 @@
-import "./globals.css";
-import { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { TokenProvider } from "@/components/providers/token-provider";
-import { getSession } from "next-auth/react";
-import Providers from "@/components/providers/provider";
+import './globals.css'
+import { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { ThemeProvider } from '@/components/providers/theme-provider'
+import { TokenProvider } from '@/components/providers/token-provider'
+import { getSession } from 'next-auth/react'
+import Providers from '@/components/providers/provider'
+import { Toaster } from '@/components/ui/toaster'
 import SubProviders from "./Providers";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -35,10 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* @ts-ignore */}
-          <Providers session={session}>
+          <Providers session={session?session:null}>
             <TokenProvider>
               <SubProviders>{children}</SubProviders>
+                            <Toaster />
             </TokenProvider>
           </Providers>
         </ThemeProvider>

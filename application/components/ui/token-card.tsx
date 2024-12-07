@@ -26,25 +26,25 @@ export function TokenCard({ token }: TokenCardProps) {
   const imageUrl = token.info?.imageUrl || '/placeholder-token.png'
 
   return (
-    <div className="w-full aspect-auto rounded-xl bg-card p-6 shadow-lg">
-      <div className="flex items-start gap-4">
-        <div className="relative w-24 h-24">
+    <div className="w-full max-w-[320px] aspect-[3/4] rounded-xl bg-card p-6 shadow-lg hover:shadow-xl transition-all border border-border/5 backdrop-blur-sm">
+      <div className="flex flex-col items-center justify-center gap-6">
+        <div className="relative w-32 h-32">
           <Image
             src={imageUrl}
             alt={token.baseToken.name}
-            className="rounded-lg object-cover"
+            className="rounded-2xl object-cover"
             fill
-            sizes="96px"
+            sizes="128px"
           />
         </div>
         
-        <div className="flex-1 space-y-2">
+        <div className="w-full text-center space-y-2">
           <div>
             <h3 className="text-2xl font-bold">{token.baseToken.name}</h3>
             <p className="text-sm text-muted-foreground">{token.baseToken.symbol}</p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Price</p>
               <p className="text-lg font-semibold">${parseFloat(token.priceUsd).toFixed(6)}</p>
@@ -66,7 +66,7 @@ export function TokenCard({ token }: TokenCardProps) {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="mt-8 grid grid-cols-2 gap-6">
         {token.liquidity && (
           <div>
             <p className="text-sm text-muted-foreground">Liquidity</p>
@@ -95,14 +95,14 @@ export function TokenCard({ token }: TokenCardProps) {
         )}
       </div>
 
-      <div className="mt-6">
-        <div className="flex gap-2">
+      <div className="mt-auto pt-8">
+        <div className="flex gap-3 justify-center">
           {token.info?.websites?.[0] && (
             <Link
               href={token.info.websites[0].url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-500 hover:underline flex items-center gap-1"
+              className="px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
             >
               <LinkIcon className="w-4 h-4" />
               Website
@@ -113,7 +113,7 @@ export function TokenCard({ token }: TokenCardProps) {
               href={token.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-500 hover:underline flex items-center gap-1"
+              className="px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
             >
               <LinkIcon className="w-4 h-4" />
               DexScreener
