@@ -89,7 +89,7 @@ contract CoinSwipe is Ownable {
         // payable(feeCollectionAddress).transfer(fee);
 
         IERC20 weth = IERC20(WETH);
-        weth.transferFrom(msg.sender, address(this), amountToSwap);
+        weth.transferFrom(msg.sender, address(this), _ethAmount);
         weth.approve(address(uniswapRouter), amountToSwap);
 
         // Perform the swap
