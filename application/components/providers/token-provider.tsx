@@ -101,7 +101,53 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   const [page, setPage] = useState(1);
   const [fetchedAddresses] = useState(new Set<string>());
 
-  // Fetch token profiles
+  const customAddresses = [
+    "0x163372Ef82CDd0BA5C632a9F075e8BD1aDdF240E",
+    "0x7A0F5E2751ee243DEDF6A1FB600a316838CF1B05",
+    "0x5EdF9324539DaF9dFeff8E15c8A8ce813968C08e",
+    "0x25F417c18D37052036e27aBCd3689cD722996E95",
+    "0x349cd84F799711a21510165229e65A07fb74E413",
+  ];
+
+  // // Fetch token profiles
+  // const fetchTokenProfiles = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       "https://api.dexscreener.com/token-profiles/latest/v1"
+  //     );
+  //     const data = await response.json();
+
+  //     // Filter profiles for base chain
+  //     const baseProfiles = data.filter(
+  //       (profile: TokenProfile) => profile.chainId === "base"
+  //     );
+
+  //     // Replace tokenAddress with custom addresses
+  //     let addressIndex = 0; // Start at the first address
+  //     const updatedProfiles = baseProfiles.map((profile: TokenProfile) => {
+  //       const updatedProfile = {
+  //         ...profile,
+  //         tokenAddress: customAddresses[addressIndex],
+  //       };
+  //       addressIndex = (addressIndex + 1) % customAddresses.length; // Cycle through addresses
+  //       return updatedProfile;
+  //     });
+
+  //     // Update state
+  //     setTokenProfiles(updatedProfiles);
+
+  //     // Extract and save token addresses
+  //     const addresses = updatedProfiles.map(
+  //       (profile: TokenProfile) => profile.tokenAddress
+  //     );
+  //     setBaseTokenAddresses((prev) => [...prev, ...addresses]);
+  //   } catch (err) {
+  //     console.error("Error fetching token profiles:", err);
+  //     setError(
+  //       err instanceof Error ? err.message : "Failed to fetch token profiles"
+  //     );
+  //   }
+  // };
   const fetchTokenProfiles = async () => {
     try {
       const response = await fetch(
@@ -119,7 +165,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       const addresses = baseProfiles.map(
         (profile: TokenProfile) => profile.tokenAddress
       );
-      setBaseTokenAddresses((prev) => [...prev, ...addresses]);
+      setBaseTokenAddresses(addresses);
     } catch (err) {
       console.error("Error fetching token profiles:", err);
       setError(
@@ -133,44 +179,23 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     if (!baseTokenAddresses.length) return;
 
     try {
-      setLoading(true);
-      // Get next batch of addresses that haven't been fetched yet
-      const unfetchedAddresses = baseTokenAddresses.filter(
-        (addr) => !fetchedAddresses.has(addr)
-      );
-      const batchSize = 10;
-      const startIdx = (page - 1) * batchSize;
-      const endIdx = startIdx + batchSize;
-      const addressBatch = unfetchedAddresses.slice(startIdx, endIdx);
-
-      if (addressBatch.length === 0) {
-        setHasMoreTokens(false);
-        setLoading(false);
-        return;
-      }
-
-      const addressesString = addressBatch.join(",");
+      // Join addresses with comma for the API call
+      const addressesString = baseTokenAddresses.join(",");
       const response = await fetch(
         `https://api.dexscreener.com/latest/dex/tokens/${addressesString}`
       );
       const data = await response.json();
 
-      // Filter for Uniswap pairs and add to set of fetched addresses
+      // Filter for Uniswap pairs
       const uniswapPairsData = data.pairs.filter(
         (pair: TokenPair) => pair.dexId === "uniswap"
       );
-      addressBatch.forEach((addr) => fetchedAddresses.add(addr));
-
-      setUniswapPairs((prev) => [...prev, ...uniswapPairsData]);
-      setPage((prev) => prev + 1);
-      setHasMoreTokens(addressBatch.length === batchSize);
+      setUniswapPairs(uniswapPairsData);
     } catch (err) {
       console.error("Error fetching token pairs:", err);
       setError(
         err instanceof Error ? err.message : "Failed to fetch token pairs"
       );
-    } finally {
-      setLoading(false);
     }
   };
 
