@@ -1,25 +1,51 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { useWallet } from '@/components/providers/wallet-provider'
-import { Wallet, ArrowRight } from 'lucide-react'
+import { signIn, useSession, signOut } from 'next-auth/react'
+import { ArrowRight, LogIn } from 'lucide-react'
 
 export function OnboardingPage() {
   const router = useRouter()
-  const { connect, isConnected } = useWallet()
+  const { data: session, status } = useSession()
   const [defaultAmount, setDefaultAmount] = useState('')
+  const [walletAddress, setWalletAddress] = useState('')
+
+  useEffect(() => {
+    // Check if user is authenticated and has email
+    if (status === 'authenticated' && session?.user?.email) {
+      // Call the wallet API with email as query parameter
+      fetch(`/api/wallet?email=${encodeURIComponent(session.user.email)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setWalletAddress(data.data.walletAddress)
+          } else {
+            console.error('Failed to create/fetch wallet:', data.error)
+          }
+        })
+        .catch(error => {
+          console.error('Error accessing wallet API:', error);
+          signOut();
+        })
+    }
+  }, [session, status])
 
   const handleContinue = () => {
-    if (isConnected && defaultAmount) {
+    if (session && defaultAmount && walletAddress) {
       router.push('/categories')
     }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4 flex items-center justify-center">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md space-y-8 p-6 bg-card rounded-xl shadow-lg"
@@ -30,13 +56,13 @@ export function OnboardingPage() {
         </div>
 
         <div className="space-y-6">
-          {!isConnected ? (
+          {!session ? (
             <button
-              onClick={connect}
+              onClick={() => signIn('google')}
               className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg p-4 hover:opacity-90 transition"
             >
-              <Wallet className="w-5 h-5" />
-              Connect Wallet
+              <LogIn className="w-5 h-5" />
+              Sign in with Google
             </button>
           ) : (
             <div className="space-y-4">
@@ -59,6 +85,9 @@ export function OnboardingPage() {
               >
                 Continue
                 <ArrowRight className="w-5 h-5" />
+              </button>
+              <button onClick={() => signOut()}>
+                Log out
               </button>
             </div>
           )}
