@@ -22,6 +22,7 @@ export function PortfolioCard({ token }: PortfolioCardProps) {
       </button>
 
       <div className="flex flex-col sm:flex-row gap-4">
+        <div className=' w-full flex items-center gap-4'>
         <Image
           width={32}
           height={32}
@@ -29,6 +30,8 @@ export function PortfolioCard({ token }: PortfolioCardProps) {
           alt={token.name}
           className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover"
         />
+        <h2 className=' break-words overflow-hidden'>{token.name}</h2>
+        </div>
         
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
