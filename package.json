@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "npx hardhat test",
+    "deploy": "npx hardhat run --network testnet ./deployments/deploy.ts"
+  },
+  "devDependencies": {
+    "@typechain/hardhat": "^9.1.0",
+    "hardhat": "^2.22.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
