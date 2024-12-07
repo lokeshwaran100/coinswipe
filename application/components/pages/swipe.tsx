@@ -87,6 +87,9 @@ export function SwipePage({ category }: { category: string }) {
       if (currentIndex < uniswapPairs.length - 1) {
         setCurrentIndex(prev => prev + 1);
       }
+      else{
+        
+      }
     } else {
       controls.start({ x: 0, opacity: 1 });
     }
@@ -119,7 +122,7 @@ export function SwipePage({ category }: { category: string }) {
           dragConstraints={{ left: 0, right: 0 }}
           onDragEnd={handleDragEnd}
           animate={controls}
-          className="touch-none"
+          className="touch-none flex justify-center"
         >
           <TokenCard token={currentToken} />
         </motion.div>
