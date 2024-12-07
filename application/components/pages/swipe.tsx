@@ -9,22 +9,50 @@ import { TokenCard } from "@/components/ui/token-card";
 import { useToast } from "@/hooks/use-toast";
 import { addCoinToPortfolio } from "@/lib/dbOperations";
 import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+
+import { gql, request } from "graphql-request";
+const query = gql`
+  {
+    swapETHToTokens(
+      where: { user: "0xd53cc2fAD80f2661e7Fd70fC7F2972A9fd9904C3" }
+    ) {
+      id
+      token
+    }
+  }
+`;
+const url = "https://api.studio.thegraph.com/query/97549/swipe/version/latest";
+interface SwapETHToToken {
+  id: string;
+  token: string;
+}
+
+interface Data {
+  swapETHToTokens: SwapETHToToken[];
+}
 
 export function SwipePage({ category }: { category: string }) {
   const { data: session, status } = useSession();
   const {toast} = useToast();
   const router = useRouter();
-  const { 
-    addToken, 
-    defaultAmount, 
-    uniswapPairs, 
-    loading, 
+  const {
+    addToken,
+    defaultAmount,
+    uniswapPairs,
+    loading,
     error,
     hasMoreTokens,
-    fetchMoreTokens 
+    fetchMoreTokens,
   } = useTokens();
   const [currentIndex, setCurrentIndex] = useState(0);
   const controls = useAnimation();
+  const { data } = useQuery({
+    queryKey: ["data"],
+    async queryFn() {
+      return await request(url, query);
+    },
+  });
 
   // Background fetching of more tokens
   useEffect(() => {
@@ -69,6 +97,10 @@ export function SwipePage({ category }: { category: string }) {
       });
     }
     console.log("token bought", uniswapPairs[currentIndex]);
+
+    // GETTING THE LAST TX HASH by the user, @TODO: SHOW THE LINK TO BASESCAN WITH THE HASH IN TOAST
+    const address = (data as Data)?.swapETHToTokens[0].id;
+    console.log(address);
   };
 
   const skip = (currentIndex: number) => {
@@ -87,10 +119,10 @@ export function SwipePage({ category }: { category: string }) {
         skip(currentIndex);
       }
       controls.set({ x: 0, opacity: 1 });
-      
+
       // Only increment if we have more tokens
       if (currentIndex < uniswapPairs.length - 1) {
-        setCurrentIndex(prev => prev + 1);
+        setCurrentIndex((prev) => prev + 1);
       }
       else{
         
