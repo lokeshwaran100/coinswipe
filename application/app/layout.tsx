@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { TokenProvider } from '@/components/providers/token-provider'
 import { getSession } from 'next-auth/react'
 import Providers from '@/components/providers/provider'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,6 +34,7 @@ export default function RootLayout({
           <Providers session={session}>
             <TokenProvider>
               {children}
+              <Toaster />
             </TokenProvider>
           </Providers>
         </ThemeProvider>

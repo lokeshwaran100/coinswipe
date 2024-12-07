@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useTokens } from "@/components/providers/token-provider";
 import { TokenCard } from "@/components/ui/token-card";
-
+import { useToast } from "@/hooks/use-toast";
 export function SwipePage({ category }: { category: string }) {
+  const {toast} = useToast();
   const router = useRouter();
   const { 
     addToken, 
@@ -34,25 +35,34 @@ export function SwipePage({ category }: { category: string }) {
   if (!uniswapPairs.length) return <div>No tokens found</div>;
 
   const buy = async (currentIndex: number) => {
-    // try {
-    //   const response = await fetch("/api/fetch-wallet", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
+    try {
+      // const response = await fetch("/api/fetch-wallet", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // });
 
-    //   const data = await response.json();
+      // const data = await response.json();
 
-    //   if (!data.success) {
-    //     throw new Error(data.error || "Contract call failed");
-    //   }
+      // if (!data.success) {
+      //   throw new Error(data.error || "Contract call failed");
+      // }
 
-    //   // Update wallet data with contract call results
-    //   console.log(data);
-    // } catch (err) {
-    //   console.error("Error calling contract:", err);
-    // }
+      // // Update wallet data with contract call results
+      // console.log(data);
+      toast({
+        title: "Token bought",
+        description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,
+      });
+    } catch (err) {
+      console.error("Error calling contract:", err);
+      toast({
+        title: "Error",
+        description: "Error calling contract",
+        variant: "destructive",
+      });
+    }
     console.log("token bought", uniswapPairs[currentIndex]);
   };
 
