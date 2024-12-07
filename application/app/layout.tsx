@@ -2,8 +2,9 @@ import './globals.css'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/providers/theme-provider'
-import { WalletProvider } from '@/components/providers/wallet-provider'
 import { TokenProvider } from '@/components/providers/token-provider'
+import { getSession } from 'next-auth/react'
+import Providers from '@/components/providers/provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,11 +14,12 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://justswipe.example.com'),
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await getSession();
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -27,11 +29,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <WalletProvider>
+          <Providers session={session}>
             <TokenProvider>
               {children}
             </TokenProvider>
-          </WalletProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>
