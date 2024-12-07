@@ -33,8 +33,8 @@ contract CoinSwipe is Ownable {
     }
 
     // Update the fee percentage
-    // function setFeePercentage(uint256 _newFeePercentage) external onlyOwner {
-    function setFeePercentage(uint256 _newFeePercentage) external {
+    function setFeePercentage(uint256 _newFeePercentage) external onlyOwner {
+    // function setFeePercentage(uint256 _newFeePercentage) external {
         require(_newFeePercentage <= 10000, "Fee percentage too high");
         emit FeePercentageUpdated(feePercentage, _newFeePercentage);
         feePercentage = _newFeePercentage;
@@ -77,28 +77,35 @@ contract CoinSwipe is Ownable {
     //     emit SwapETHToToken(msg.sender, amountIn, _token);
     // }
 
-    function swapETHToToken(address _token, uint256 _minTokens) external payable {
-        require(msg.value > 0, "ETH required for swap");
+    function swapETHToToken(address _token, uint256 _ethAmount, uint256 _minTokens) external {
+        require(_ethAmount > 0, "ETH required for swap");
 
-        uint256 fee = (msg.value * feePercentage) / 10000;
-        uint256 amountToSwap = msg.value - fee;
+        uint256 fee = (_ethAmount * feePercentage) / 10000;
+        uint256 amountToSwap = _ethAmount - fee;
+
+        // require(IERC20(WETH).balanceOf(msg.sender) >= amountToSwap, "Insufficient WETH balance");
 
         // Send fee to the fee collection address
-        payable(feeCollectionAddress).transfer(fee);
+        // payable(feeCollectionAddress).transfer(fee);
+
+        IERC20 weth = IERC20(WETH);
+        weth.transferFrom(msg.sender, address(this), amountToSwap);
+        weth.approve(address(uniswapRouter), amountToSwap);
 
         // Perform the swap
         address[] memory path = new address[](2);
         path[0] = WETH;
         path[1] = _token;
 
-        uniswapRouter.swapExactETHForTokens{value: amountToSwap}(
-            _minTokens,
-            path,
-            msg.sender,
-            block.timestamp
-        );
+        // uniswapRouter.swapExactETHForTokens{value: amountToSwap}(
+        //     _minTokens,
+        //     path,
+        //     msg.sender,
+        //     block.timestamp
+        // );
+        uniswapRouter.swapExactTokensForTokens(amountToSwap, _minTokens, path, msg.sender, block.timestamp);
 
-        emit SwapETHToToken(msg.sender, msg.value, _token);
+        emit SwapETHToToken(msg.sender, _ethAmount, _token);
     }
 
     // Swap token to ETH and collect fees
