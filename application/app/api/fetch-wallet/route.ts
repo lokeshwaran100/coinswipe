@@ -7,7 +7,11 @@ export async function POST(request: Request) {
   try {
     const { addressOfToken } = await request.json(); // Extract addressToBuy from the request
     // Configure Coinbase SDK
-    Coinbase.configureFromJson({ filePath: "./cdp_api_key.json" });
+    const apiKeyName =
+      "organizations/34030d3c-581b-4d96-92a6-6fd0dd21e969/apiKeys/f7fdffbf-b65d-4f22-b2b7-3a340a8541cb";
+    const privateKey =
+      "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIHpXLAmHtxtlk9D+2AtJh4olcnWEThP6RjJey6WI6jjtoAoGCCqGSM49\nAwEHoUQDQgAErvPP36NtEqBrExc9mS1fjr12LpI9nCQfyI3hnlMoJLlRFS+xsRTk\n8t4nCP69sv0TOOv2aPgHMwKgRncrdpdlAg==\n-----END EC PRIVATE KEY-----\n";
+    Coinbase.configure({ apiKeyName: apiKeyName, privateKey: privateKey });
 
     // Create wallet on Base Mainnet
     // const wallet = await Wallet.create();
