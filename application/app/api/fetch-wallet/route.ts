@@ -17,7 +17,8 @@ export async function POST(request: Request) {
     // const wallet = await Wallet.create();
 
     // Pick a file to which to save your wallet seed.
-    const filePath = "my_seed.json";
+    const path = require("path");
+    const filePath = path.join(process.cwd(), "my_seed.json");
     // Set encrypt to true to encrypt the wallet seed with your CDP secret API key.
     // wallet.saveSeed(filePath, true);
 
