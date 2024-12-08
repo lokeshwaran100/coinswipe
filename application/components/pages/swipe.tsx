@@ -120,7 +120,7 @@ export function SwipePage({ category }: { category: string }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ addressOfToken, buy: true }), // Send addressToBuy as part of the request body
+        body: JSON.stringify({ addressOfToken }), // Send addressToBuy as part of the request body
       });
 
       const data = await response.json();
