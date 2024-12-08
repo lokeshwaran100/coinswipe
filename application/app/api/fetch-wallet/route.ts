@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const { addressOfToken } = await request.json(); // Extract addressToBuy from the request
     // Configure Coinbase SDK
-    Coinbase.configureFromJson({ filePath: "cdp_api_key.json" });
+    Coinbase.configureFromJson({ filePath: "./cdp_api_key.json" });
 
     // Create wallet on Base Mainnet
     // const wallet = await Wallet.create();
