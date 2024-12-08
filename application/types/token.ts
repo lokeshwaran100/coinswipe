@@ -6,4 +6,5 @@ export interface Token {
   priceChange: number
   image: string
   amount: string
+  value: string
 }

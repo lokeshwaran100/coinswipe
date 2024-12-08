@@ -83,7 +83,7 @@ export function SwipePage({ category }: { category: string }) {
 
       // // Update wallet data with contract call results
       // console.log(data);
-      await addCoinToPortfolio(session?.user?.email as string, uniswapPairs[currentIndex]);
+      await addCoinToPortfolio(session?.user?.email as string, uniswapPairs[currentIndex], defaultAmount);
       toast({
         title: "Token bought",
         description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,

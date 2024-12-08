@@ -107,6 +107,7 @@ export function PortfolioPage() {
                   priceChange: 0,
                   image: token.imageUrl,
                   amount: token.amount,
+                  value: token.value
                 }}
               />
             </motion.div>

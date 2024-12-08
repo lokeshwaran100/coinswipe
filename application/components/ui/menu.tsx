@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from 'next/navigation'
-import { LogOut, Wallet } from 'lucide-react'
+import { LogOut, Wallet, LayoutGrid } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 
 export function Menu() {
@@ -22,6 +22,13 @@ export function Menu() {
           Portfolio
         </button>
         <div className="w-px h-4 bg-border" />
+        <button
+          onClick={()  => router.push('/categories')}
+          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-destructive transition"
+        >
+          <LayoutGrid className="w-4 h-4" />
+          Categories
+        </button>
         <button
           onClick={() => signOut({callbackUrl: "/"})}
           className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-destructive transition"

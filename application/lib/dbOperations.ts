@@ -26,12 +26,13 @@ export const createUser = async (email: string) => {
 };
 
 // Function to add a coin to user's portfolio
-export const addCoinToPortfolio = async (email: string, coin:TokenPair) => {
+export const addCoinToPortfolio = async (email: string, coin:TokenPair, defaultValue:string) => {
     const coinData ={
         name:coin.baseToken.name,
         imageUrl:coin.info.imageUrl,
         address:coin.baseToken.address,
-        amount:coin.amount 
+        amount:coin.amount,
+        value: defaultValue
     }
   try {
     const response = await fetch(API_BASE_URL, {
@@ -42,10 +43,11 @@ export const addCoinToPortfolio = async (email: string, coin:TokenPair) => {
       body: JSON.stringify({ email, coin: coinData }),
     });
 
+    console.log("The response is",response);
+
     if (!response.ok) {
       throw new Error('Failed to add coin');
     }
-
     return await response.json();
   } catch (error) {
     console.error('Error adding coin:', error);

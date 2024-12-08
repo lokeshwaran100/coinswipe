@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { signIn, useSession, signOut } from 'next-auth/react'
 import { ArrowRight, LogIn } from 'lucide-react'
 import { createUser } from '@/lib/dbOperations'
+import Link from 'next/link'
 
 export function OnboardingPage() {
   const router = useRouter()
@@ -83,18 +84,16 @@ export function OnboardingPage() {
                   step="0.01"
                 />
               </label>
-
-              <button
-                onClick={handleContinue}
+              <Link href="/categories">
+                <button
+                  onClick={handleContinue}
                 disabled={!defaultAmount}
                 className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg p-4 hover:opacity-90 transition disabled:opacity-50"
               >
                 Continue
                 <ArrowRight className="w-5 h-5" />
-              </button>
-              <button onClick={() => signOut()}>
-                Log out
-              </button>
+                </button>
+              </Link>
             </div>
           )}
         </div>
