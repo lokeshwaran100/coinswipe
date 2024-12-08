@@ -5,7 +5,7 @@ import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 
 export async function POST(request: Request) {
   try {
-    const { addressToBuy } = await request.json(); // Extract addressToBuy from the request
+    const { addressToBuy, buy } = await request.json(); // Extract addressToBuy from the request
     // Configure Coinbase SDK
     Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
@@ -50,194 +50,198 @@ export async function POST(request: Request) {
     // const faucetTransaction = await wallet.faucet();
     // console.log(`Faucet transaction: ${faucetTransaction}`);
 
-    const approveInvocation = await wallet.invokeContract({
-      contractAddress: "0x4200000000000000000000000000000000000006",
-      method: "approve",
-      args: {
-        guy: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
-        wad: "10000000000000",
-      },
-      abi: [
-        {
-          constant: false,
-          inputs: [
-            {
-              internalType: "address",
-              name: "guy",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "wad",
-              type: "uint256",
-            },
-          ],
-          name: "approve",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          payable: false,
-          stateMutability: "nonpayable",
-          type: "function",
+    if (buy) {
+      const approveInvocation = await wallet.invokeContract({
+        contractAddress: "0x4200000000000000000000000000000000000006",
+        method: "approve",
+        args: {
+          guy: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
+          wad: "10000000000000",
         },
-      ],
-      // amount: 1000000000000,
-    });
+        abi: [
+          {
+            constant: false,
+            inputs: [
+              {
+                internalType: "address",
+                name: "guy",
+                type: "address",
+              },
+              {
+                internalType: "uint256",
+                name: "wad",
+                type: "uint256",
+              },
+            ],
+            name: "approve",
+            outputs: [
+              {
+                internalType: "bool",
+                name: "",
+                type: "bool",
+              },
+            ],
+            payable: false,
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        // amount: 1000000000000,
+      });
 
-    const appResult = await approveInvocation.wait();
-    console.log(appResult);
+      const appResult = await approveInvocation.wait();
+      console.log(appResult);
 
-    // Execute the contract call
-    const buyInvocation = await wallet.invokeContract({
-      contractAddress: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
-      method: "swapETHToToken",
-      args: {
-        _token: addressToBuy,
-        _ethAmount: "10000000000000",
-        _minTokens: "39200",
-      },
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "_ethAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "_minTokens",
-              type: "uint256",
-            },
-          ],
-          name: "swapETHToToken",
-          outputs: [],
-          payable: false,
-          stateMutability: "nonpayable",
-          type: "function",
+      // Execute the contract call
+      const buyInvocation = await wallet.invokeContract({
+        contractAddress: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
+        method: "swapETHToToken",
+        args: {
+          _token: addressToBuy,
+          _ethAmount: "10000000000000",
+          _minTokens: "39200",
         },
-      ],
-      // amount: 1000000000000,
-    });
+        abi: [
+          {
+            inputs: [
+              {
+                internalType: "address",
+                name: "_token",
+                type: "address",
+              },
+              {
+                internalType: "uint256",
+                name: "_ethAmount",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
+                name: "_minTokens",
+                type: "uint256",
+              },
+            ],
+            name: "swapETHToToken",
+            outputs: [],
+            payable: false,
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        // amount: 1000000000000,
+      });
 
-    // const transferArgs = {
-    //   to: "0xef9C9e03d8cF4fb38D8Ce3d44A956b21aC4bF90b",
-    //   value: "100000000000000", // 0.001 ETH with 18 decimals
-    // };
+      // const transferArgs = {
+      //   to: "0xef9C9e03d8cF4fb38D8Ce3d44A956b21aC4bF90b",
+      //   value: "100000000000000", // 0.001 ETH with 18 decimals
+      // };
 
-    // console.log("here");
+      // console.log("here");
 
-    // let contractInvocation = await wallet.invokeContract({
-    //   contractAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-    //   method: "transfer",
-    //   args: transferArgs,
-    //   abi: [
-    //     {
-    //       inputs: [
-    //         { name: "to", type: "address" },
-    //         { name: "value", type: "uint256" },
-    //       ],
-    //       name: "transfer",
-    //       outputs: [{ name: "", type: "bool" }],
-    //       type: "function",
-    //     },
-    //   ],
-    // });
+      // let contractInvocation = await wallet.invokeContract({
+      //   contractAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+      //   method: "transfer",
+      //   args: transferArgs,
+      //   abi: [
+      //     {
+      //       inputs: [
+      //         { name: "to", type: "address" },
+      //         { name: "value", type: "uint256" },
+      //       ],
+      //       name: "transfer",
+      //       outputs: [{ name: "", type: "bool" }],
+      //       type: "function",
+      //     },
+      //   ],
+      // });
 
-    // Get the result from the invocation
-    // const depositResult = await depositInvocation.wait();
+      // Get the result from the invocation
+      // const depositResult = await depositInvocation.wait();
 
-    const result = await buyInvocation.wait();
-    console.log(result);
+      const result = await buyInvocation.wait();
+      console.log(result);
+    }
 
-    // const approveSellInvocation = await wallet.invokeContract({
-    //   contractAddress: "0x5EdF9324539DaF9dFeff8E15c8A8ce813968C08e",
-    //   method: "approve",
-    //   args: {
-    //     guy: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
-    //     wad: "600000000000000000000000000",
-    //   },
-    //   abi: [
-    //     {
-    //       constant: false,
-    //       inputs: [
-    //         {
-    //           internalType: "address",
-    //           name: "guy",
-    //           type: "address",
-    //         },
-    //         {
-    //           internalType: "uint256",
-    //           name: "wad",
-    //           type: "uint256",
-    //         },
-    //       ],
-    //       name: "approve",
-    //       outputs: [
-    //         {
-    //           internalType: "bool",
-    //           name: "",
-    //           type: "bool",
-    //         },
-    //       ],
-    //       payable: false,
-    //       stateMutability: "nonpayable",
-    //       type: "function",
-    //     },
-    //   ],
-    //   // amount: 1000000000000,
-    // });
+    if (!buy) {
+      const approveSellInvocation = await wallet.invokeContract({
+        contractAddress: "0x5EdF9324539DaF9dFeff8E15c8A8ce813968C08e",
+        method: "approve",
+        args: {
+          guy: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
+          wad: "600000000000000000000000000",
+        },
+        abi: [
+          {
+            constant: false,
+            inputs: [
+              {
+                internalType: "address",
+                name: "guy",
+                type: "address",
+              },
+              {
+                internalType: "uint256",
+                name: "wad",
+                type: "uint256",
+              },
+            ],
+            name: "approve",
+            outputs: [
+              {
+                internalType: "bool",
+                name: "",
+                type: "bool",
+              },
+            ],
+            payable: false,
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        // amount: 1000000000000,
+      });
 
-    // const result = await approveSellInvocation.wait();
-    // console.log(result);
+      const result = await approveSellInvocation.wait();
+      console.log(result);
 
-    // const sellInvocation = await wallet.invokeContract({
-    //   contractAddress: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
-    //   method: "swapTokenToETH",
-    //   args: {
-    //     _token: "0x5EdF9324539DaF9dFeff8E15c8A8ce813968C08e",
-    //     _tokenAmount: "600000000000000000",
-    //     _minETH: "39200",
-    //   },
-    //   abi: [
-    //     {
-    //       inputs: [
-    //         {
-    //           internalType: "address",
-    //           name: "_token",
-    //           type: "address",
-    //         },
-    //         {
-    //           internalType: "uint256",
-    //           name: "_tokenAmount",
-    //           type: "uint256",
-    //         },
-    //         {
-    //           internalType: "uint256",
-    //           name: "_minETH",
-    //           type: "uint256",
-    //         },
-    //       ],
-    //       name: "swapTokenToETH",
-    //       outputs: [],
-    //       stateMutability: "nonpayable",
-    //       type: "function",
-    //     },
-    //   ],
-    //   // amount: 1000000000000,
-    // });
+      const sellInvocation = await wallet.invokeContract({
+        contractAddress: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
+        method: "swapTokenToETH",
+        args: {
+          _token: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
+          _tokenAmount: "600000000000000000",
+          _minETH: "39200",
+        },
+        abi: [
+          {
+            inputs: [
+              {
+                internalType: "address",
+                name: "_token",
+                type: "address",
+              },
+              {
+                internalType: "uint256",
+                name: "_tokenAmount",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
+                name: "_minETH",
+                type: "uint256",
+              },
+            ],
+            name: "swapTokenToETH",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        // amount: 1000000000000,
+      });
 
-    // const result2 = await sellInvocation.wait();
-    // console.log(result2);
+      const result2 = await sellInvocation.wait();
+      console.log(result2);
+    }
 
     return NextResponse.json({
       success: true,

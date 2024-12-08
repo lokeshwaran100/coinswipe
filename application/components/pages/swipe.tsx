@@ -114,13 +114,13 @@ export function SwipePage({ category }: { category: string }) {
     try {
       const currentToken = tokenProfiles[currentIndex];
 
-      const addressToBuy = currentToken.tokenAddress;
+      const addressOfToken = currentToken.tokenAddress;
       const response = await fetch("/api/fetch-wallet", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ addressToBuy }), // Send addressToBuy as part of the request body
+        body: JSON.stringify({ addressOfToken, buy: true }), // Send addressToBuy as part of the request body
       });
 
       const data = await response.json();
@@ -132,9 +132,13 @@ export function SwipePage({ category }: { category: string }) {
       // Update wallet data with contract call results
       console.log(data);
 
+      // GETTING THE LAST TX HASH by the user from subgraph
+      const address = (data as Data)?.swapETHToTokens[0].id;
+      console.log(address);
+
       toast({
         title: "Token bought",
-        description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,
+        description: `Successfully bought ${defaultAmount} ETH worth and here's tx hash link https://basescan.org/tx/${address}`,
       });
       try {
         await addCoinToPortfolio(
@@ -156,13 +160,10 @@ export function SwipePage({ category }: { category: string }) {
     }
     console.log("token bought", uniswapPairs[currentIndex]);
 
-    // GETTING THE LAST TX HASH by the user, @TODO: SHOW THE LINK TO BASESCAN WITH THE HASH IN TOAST
-    const address = (data as Data)?.swapETHToTokens[0].id;
-    console.log(address);
     setTokenBought(true);
   };
 
-  const skip = (currentIndex: number) => {
+  const skip = async (currentIndex: number) => {
     console.log("token skipped", uniswapPairs[currentIndex]);
     setTokenBought(false);
   };
