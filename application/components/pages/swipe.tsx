@@ -123,30 +123,40 @@ export function SwipePage({ category }: { category: string }) {
         body: JSON.stringify({ addressOfToken }), // Send addressToBuy as part of the request body
       });
 
-      const data = await response.json();
+      const dataa = await response.json();
 
-      console.log("data from the contract", data);
-      if (!data.success) {
-        throw new Error(data.error || "Contract call failed");
+      console.log("data from the contract", dataa);
+      if (!dataa.success) {
+        throw new Error(dataa.error || "Contract call failed");
       }
 
       // Update wallet data with contract call results
-      console.log(data);
+      console.log(dataa);
 
       // GETTING THE LAST TX HASH by the user from subgraph
-      // const address = (data as Data)?.swapETHToTokens[0].id;
-      // console.log(address);
+      const address = (data as Data)?.swapETHToTokens[0].id;
+      console.log(address);
 
-        await addCoinToPortfolio(
-          session?.user?.email as string,
-          uniswapPairs[currentIndex],
-          defaultAmount
-        );
-        toast({
-          title: "Token bought",
-          description: `Successfully bought ${defaultAmount} ETH worth`,
-        });
-
+      await addCoinToPortfolio(
+        session?.user?.email as string,
+        uniswapPairs[currentIndex],
+        defaultAmount
+      );
+      toast({
+        title: "Token bought",
+        description: (
+          <>
+            Successfully bought {defaultAmount} ETH worth.{" "}
+            <a
+              href={`https://sepolia.basescan.org/address/0xd53cc2fad80f2661e7fd70fc7f2972a9fd9904c3`}
+              target="_blank"
+              style={{ color: "#3498db" }}
+            >
+              Click here for details
+            </a>
+          </>
+        ),
+      });
     } catch (err) {
       console.error("Error calling contract:", err);
       toast({
