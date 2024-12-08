@@ -5,6 +5,7 @@ const PortfolioSchema = new mongoose.Schema({
   imageUrl: String,
   address: String,
   amount: String,
+  value: String
 });
 
 const UserSchema = new mongoose.Schema({

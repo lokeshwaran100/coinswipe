@@ -50,7 +50,7 @@ export function PortfolioCard({ token }: PortfolioCardProps) {
             <div>
               <p className="text-xs sm:text-sm text-muted-foreground">Value</p>
               <p className="text-sm sm:text-base font-medium">
-                ${(parseFloat(token.amount) * token.price).toFixed(2)}
+                {token.value} ETH
               </p>
             </div>
           </div>

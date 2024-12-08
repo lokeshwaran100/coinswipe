@@ -85,10 +85,11 @@ export function SwipePage({ category }: { category: string }) {
       if (!data.success) {
         throw new Error(data.error || "Contract call failed");
       }
+      await addCoinToPortfolio(session?.user?.email as string, uniswapPairs[currentIndex], defaultAmount);
+      
 
       // Update wallet data with contract call results
       console.log(data);
-
       toast({
         title: "Token bought",
         description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,
