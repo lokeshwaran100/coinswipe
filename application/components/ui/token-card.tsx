@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, ArrowDownRight, Link as LinkIcon } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, Link as LinkIcon, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { TokenPair } from '@/components/providers/token-provider'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -26,7 +26,14 @@ export function TokenCard({ token }: TokenCardProps) {
   const imageUrl = token.info?.imageUrl || '/placeholder-token.png'
 
   return (
-    <div className="w-full max-w-[320px] aspect-[3/4] rounded-xl bg-card p-6 shadow-lg hover:shadow-xl transition-all border border-border/5 backdrop-blur-sm">
+    <div className="w-full max-w-[320px] aspect-[3/4] rounded-xl bg-card p-6 shadow-lg hover:shadow-xl transition-all border border-border/5 backdrop-blur-sm relative">
+      <div className="absolute inset-y-0 -left-8 flex items-center text-muted-foreground/50">
+        <ChevronsLeft className="w-10 h-10 animate-pulse" />
+      </div>
+      <div className="absolute inset-y-0 -right-8 flex items-center text-muted-foreground/50">
+        <ChevronsRight className="w-10 h-10 animate-pulse" />
+      </div>
+
       <div className="flex flex-col items-center justify-center gap-6">
         <div className="relative w-32 h-32">
           <Image
