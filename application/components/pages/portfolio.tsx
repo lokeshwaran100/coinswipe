@@ -44,7 +44,6 @@ export function PortfolioPage() {
   });
 
   const getAllTokensAndHashesByUser = async () => {
-    // @TODO: GET ALL TOKENS AND HASHES BY USER, SHOW THIS IN THIS PORTFOLIO PAGE
     (data as Data)?.swapETHToTokens.forEach((item) => {
       console.log("Hash (id):", item.id);
       console.log("Token (token):", item.token);
@@ -135,7 +134,7 @@ export function PortfolioPage() {
                   priceChange: 0,
                   image: token.imageUrl,
                   amount: token.amount,
-                  value: token.value
+                  value: token.value,
                 }}
               />
             </motion.div>
