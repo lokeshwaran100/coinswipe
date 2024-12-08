@@ -34,12 +34,13 @@ interface Data {
 
 export function SwipePage({ category }: { category: string }) {
   const { data: session, status } = useSession();
-  const {toast} = useToast();
+  const { toast } = useToast();
   const router = useRouter();
   const {
     addToken,
     defaultAmount,
     uniswapPairs,
+    tokenProfiles,
     loading,
     error,
     hasMoreTokens,
@@ -68,26 +69,39 @@ export function SwipePage({ category }: { category: string }) {
 
   const buy = async (currentIndex: number) => {
     try {
-      // const response = await fetch("/api/fetch-wallet", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
+      const currentToken = tokenProfiles[currentIndex];
 
-      // const data = await response.json();
+      const addressToBuy = currentToken.tokenAddress;
+      const response = await fetch("/api/fetch-wallet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ addressToBuy }), // Send addressToBuy as part of the request body
+      });
 
-      // if (!data.success) {
-      //   throw new Error(data.error || "Contract call failed");
-      // }
+      const data = await response.json();
 
-      // // Update wallet data with contract call results
-      // console.log(data);
-      await addCoinToPortfolio(session?.user?.email as string, uniswapPairs[currentIndex]);
+      if (!data.success) {
+        throw new Error(data.error || "Contract call failed");
+      }
+
+      // Update wallet data with contract call results
+      console.log(data);
+
       toast({
         title: "Token bought",
         description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,
       });
+      try {
+        await addCoinToPortfolio(
+          session?.user?.email as string,
+          uniswapPairs[currentIndex]
+        );
+      } catch (err) {
+        // Handle or log the error from addCoinToPortfolio without letting it propagate to the outer catch block
+        console.error("Error adding coin to portfolio:", err);
+      }
     } catch (err) {
       console.error("Error calling contract:", err);
       toast({
@@ -123,9 +137,7 @@ export function SwipePage({ category }: { category: string }) {
       // Only increment if we have more tokens
       if (currentIndex < uniswapPairs.length - 1) {
         setCurrentIndex((prev) => prev + 1);
-      }
-      else{
-        
+      } else {
       }
     } else {
       controls.start({ x: 0, opacity: 1 });
