@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { addCoinToPortfolio } from "@/lib/dbOperations";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
+import { HfInference } from "@huggingface/inference";
+const inference = new HfInference("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");
 
 import { gql, request } from "graphql-request";
 const query = gql`
@@ -54,6 +56,43 @@ export function SwipePage({ category }: { category: string }) {
       return await request(url, query);
     },
   });
+  const [trustScore, setTrustScore] = useState(0);
+  const [tokenbought, setTokenBought] = useState(false);
+
+  useEffect(() => {
+    const callHuggingFace = async () => {
+      const prompt: Array<{ role: string; content: string }> = [
+        {
+          role: "system",
+          content: `ONLY NUMBER AS RESPONSE. Given the JSON data for a cryptocurrency token, analyze the trustworthiness of the coin based on factors such as liquidity, market data, token verification, social media presence, and developer activity. Do not provide an explanation or additional context. Only return a score out of 100 indicating the trustworthiness of the coin`,
+        },
+        {
+          role: "user",
+          content: JSON.stringify(currentToken),
+        },
+      ];
+
+      let fullResponse = "";
+      try {
+        for await (const chunk of inference.chatCompletionStream({
+          model: "mistralai/Mistral-Nemo-Instruct-2407",
+          messages: prompt,
+          max_tokens: 5,
+          stream: false,
+        })) {
+          let content = chunk.choices[0]?.delta?.content || "";
+          fullResponse += content;
+        }
+
+        console.log(fullResponse, "fullResponse");
+        setTrustScore(parseInt(fullResponse)); // Only set trust score if valid response
+      } catch (err) {
+        console.error("Error calling HuggingFace API:", err);
+      }
+    };
+
+    callHuggingFace();
+  }, [tokenbought]);
 
   // Background fetching of more tokens
   useEffect(() => {
@@ -61,6 +100,10 @@ export function SwipePage({ category }: { category: string }) {
       fetchMoreTokens();
     }
   }, [currentIndex, uniswapPairs.length, hasMoreTokens, fetchMoreTokens]);
+
+  // Ensure we have a token to display
+  const currentToken = uniswapPairs[currentIndex];
+  if (!currentToken) return null;
 
   // Only show initial loading state
   if (!uniswapPairs.length && loading) return <div>Loading...</div>;
@@ -85,11 +128,10 @@ export function SwipePage({ category }: { category: string }) {
       if (!data.success) {
         throw new Error(data.error || "Contract call failed");
       }
-      await addCoinToPortfolio(session?.user?.email as string, uniswapPairs[currentIndex], defaultAmount);
-      
 
       // Update wallet data with contract call results
       console.log(data);
+
       toast({
         title: "Token bought",
         description: `successfully bought ${defaultAmount} ETH worth of ${uniswapPairs[currentIndex].baseToken.name}`,
@@ -97,7 +139,8 @@ export function SwipePage({ category }: { category: string }) {
       try {
         await addCoinToPortfolio(
           session?.user?.email as string,
-          uniswapPairs[currentIndex]
+          uniswapPairs[currentIndex],
+          defaultAmount
         );
       } catch (err) {
         // Handle or log the error from addCoinToPortfolio without letting it propagate to the outer catch block
@@ -116,10 +159,12 @@ export function SwipePage({ category }: { category: string }) {
     // GETTING THE LAST TX HASH by the user, @TODO: SHOW THE LINK TO BASESCAN WITH THE HASH IN TOAST
     const address = (data as Data)?.swapETHToTokens[0].id;
     console.log(address);
+    setTokenBought(true);
   };
 
   const skip = (currentIndex: number) => {
     console.log("token skipped", uniswapPairs[currentIndex]);
+    setTokenBought(false);
   };
 
   const handleDragEnd = async (event: any, info: PanInfo) => {
@@ -144,10 +189,6 @@ export function SwipePage({ category }: { category: string }) {
       controls.start({ x: 0, opacity: 1 });
     }
   };
-
-  // Ensure we have a token to display
-  const currentToken = uniswapPairs[currentIndex];
-  if (!currentToken) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
@@ -174,7 +215,7 @@ export function SwipePage({ category }: { category: string }) {
           animate={controls}
           className="touch-none flex justify-center"
         >
-          <TokenCard token={currentToken} />
+          <TokenCard token={currentToken} trustScore={trustScore} />
         </motion.div>
       </div>
     </div>

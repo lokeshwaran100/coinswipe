@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       contractAddress: "0x4200000000000000000000000000000000000006",
       method: "approve",
       args: {
-        guy: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
+        guy: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
         wad: "10000000000000",
       },
       abi: [
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
 
     // Execute the contract call
     const buyInvocation = await wallet.invokeContract({
-      contractAddress: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
+      contractAddress: "0xCD730336153Dad2666909f5eEfFCBc28D899a606",
       method: "swapETHToToken",
       args: {
         _token: addressToBuy,

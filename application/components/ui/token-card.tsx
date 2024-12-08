@@ -1,29 +1,32 @@
-"use client"
+"use client";
 
-import { ArrowUpRight, ArrowDownRight, Link as LinkIcon } from 'lucide-react'
-import { TokenPair } from '@/components/providers/token-provider'
-import Image from 'next/image'
-import Link from 'next/link'
+import { ArrowUpRight, ArrowDownRight, Link as LinkIcon } from "lucide-react";
+import { TokenPair } from "@/components/providers/token-provider";
+import Image from "next/image";
+import Link from "next/link";
+import { TrustScore } from "../TrustScore";
+import { useEffect, useState } from "react";
 
 interface TokenCardProps {
-  token: TokenPair
+  token: TokenPair;
+  trustScore: number;
 }
 
-export function TokenCard({ token }: TokenCardProps) {
+export function TokenCard({ token, trustScore }: TokenCardProps) {
   // Get 24h price change and determine if it's positive
-  const priceChange = parseFloat(token.priceChange?.h24 || '0')
-  const isPositive = priceChange >= 0
+  const priceChange = parseFloat(token.priceChange?.h24 || "0");
+  const isPositive = priceChange >= 0;
 
   // Format large numbers
   const formatNumber = (num: number) => {
-    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`
-    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`
-    if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`
-    return `$${num.toFixed(2)}`
-  }
+    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
+    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
+    if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
+    return `$${num.toFixed(2)}`;
+  };
 
   // Handle missing image URL
-  const imageUrl = token.info?.imageUrl || '/placeholder-token.png'
+  const imageUrl = token.info?.imageUrl || "/placeholder-token.png";
 
   return (
     <div className="w-full max-w-[320px] aspect-[3/4] rounded-xl bg-card p-6 shadow-lg hover:shadow-xl transition-all border border-border/5 backdrop-blur-sm">
@@ -37,21 +40,29 @@ export function TokenCard({ token }: TokenCardProps) {
             sizes="128px"
           />
         </div>
-        
+
         <div className="w-full text-center space-y-2">
           <div>
             <h3 className="text-2xl font-bold">{token.baseToken.name}</h3>
-            <p className="text-sm text-muted-foreground">{token.baseToken.symbol}</p>
+            <p className="text-sm text-muted-foreground">
+              {token.baseToken.symbol}
+            </p>
           </div>
-
+          <TrustScore score={trustScore} className="justify-center" />
           <div className="flex items-center justify-center gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Price</p>
-              <p className="text-lg font-semibold">${parseFloat(token.priceUsd).toFixed(6)}</p>
+              <p className="text-lg font-semibold">
+                ${parseFloat(token.priceUsd).toFixed(6)}
+              </p>
             </div>
-            
+
             {token.priceChange && (
-              <div className={`flex items-center gap-1 ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+              <div
+                className={`flex items-center gap-1 ${
+                  isPositive ? "text-green-500" : "text-red-500"
+                }`}
+              >
                 {isPositive ? (
                   <ArrowUpRight className="w-4 h-4" />
                 ) : (
@@ -122,5 +133,5 @@ export function TokenCard({ token }: TokenCardProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
