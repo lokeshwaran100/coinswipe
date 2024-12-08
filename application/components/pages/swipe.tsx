@@ -1,29 +1,126 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, PanInfo, useAnimation } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useTokens } from "@/components/providers/token-provider";
 import { TokenCard } from "@/components/ui/token-card";
+import { useToast } from "@/hooks/use-toast";
+import { addCoinToPortfolio } from "@/lib/dbOperations";
+import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+import { HfInference } from "@huggingface/inference";
+const inference = new HfInference("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");
+
+import { gql, request } from "graphql-request";
+const query = gql`
+  {
+    swapETHToTokens(
+      where: { user: "0xd53cc2fAD80f2661e7Fd70fC7F2972A9fd9904C3" }
+    ) {
+      id
+      token
+    }
+  }
+`;
+const url = "https://api.studio.thegraph.com/query/97549/swipe/version/latest";
+interface SwapETHToToken {
+  id: string;
+  token: string;
+}
+
+interface Data {
+  swapETHToTokens: SwapETHToToken[];
+}
 
 export function SwipePage({ category }: { category: string }) {
+  const { data: session, status } = useSession();
+  const { toast } = useToast();
   const router = useRouter();
-  const { addToken, defaultAmount, uniswapPairs, loading, error } = useTokens();
+  const {
+    addToken,
+    defaultAmount,
+    uniswapPairs,
+    tokenProfiles,
+    loading,
+    error,
+    hasMoreTokens,
+    fetchMoreTokens,
+  } = useTokens();
   const [currentIndex, setCurrentIndex] = useState(0);
   const controls = useAnimation();
+  const { data } = useQuery({
+    queryKey: ["data"],
+    async queryFn() {
+      return await request(url, query);
+    },
+  });
+  const [trustScore, setTrustScore] = useState(0);
+  const [tokenbought, setTokenBought] = useState(false);
 
-  if (loading) return <div>Loading...</div>;
+  useEffect(() => {
+    const callHuggingFace = async () => {
+      const prompt: Array<{ role: string; content: string }> = [
+        {
+          role: "system",
+          content: `ONLY NUMBER AS RESPONSE. Given the JSON data for a cryptocurrency token, analyze the trustworthiness of the coin based on factors such as liquidity, market data, token verification, social media presence, and developer activity. Do not provide an explanation or additional context. Only return a score out of 100 indicating the trustworthiness of the coin`,
+        },
+        {
+          role: "user",
+          content: JSON.stringify(currentToken),
+        },
+      ];
+
+      let fullResponse = "";
+      try {
+        for await (const chunk of inference.chatCompletionStream({
+          model: "mistralai/Mistral-Nemo-Instruct-2407",
+          messages: prompt,
+          max_tokens: 5,
+          stream: false,
+        })) {
+          let content = chunk.choices[0]?.delta?.content || "";
+          fullResponse += content;
+        }
+
+        console.log(fullResponse, "fullResponse");
+        setTrustScore(parseInt(fullResponse)); // Only set trust score if valid response
+      } catch (err) {
+        console.error("Error calling HuggingFace API:", err);
+      }
+    };
+
+    callHuggingFace();
+  }, [tokenbought]);
+
+  // Background fetching of more tokens
+  useEffect(() => {
+    if (currentIndex >= uniswapPairs.length - 5 && hasMoreTokens) {
+      fetchMoreTokens();
+    }
+  }, [currentIndex, uniswapPairs.length, hasMoreTokens, fetchMoreTokens]);
+
+  // Ensure we have a token to display
+  const currentToken = uniswapPairs[currentIndex];
+  if (!currentToken) return null;
+
+  // Only show initial loading state
+  if (!uniswapPairs.length && loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
   if (!uniswapPairs.length) return <div>No tokens found</div>;
 
   const buy = async (currentIndex: number) => {
     try {
+      const currentToken = tokenProfiles[currentIndex];
+
+      const addressOfToken = currentToken.tokenAddress;
       const response = await fetch("/api/fetch-wallet", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ addressOfToken, buy: true }), // Send addressToBuy as part of the request body
       });
 
       const data = await response.json();
@@ -34,14 +131,41 @@ export function SwipePage({ category }: { category: string }) {
 
       // Update wallet data with contract call results
       console.log(data);
+
+      // GETTING THE LAST TX HASH by the user from subgraph
+      const address = (data as Data)?.swapETHToTokens[0].id;
+      console.log(address);
+
+      toast({
+        title: "Token bought",
+        description: `Successfully bought ${defaultAmount} ETH worth and here's tx hash link https://basescan.org/tx/${address}`,
+      });
+      try {
+        await addCoinToPortfolio(
+          session?.user?.email as string,
+          uniswapPairs[currentIndex],
+          defaultAmount
+        );
+      } catch (err) {
+        // Handle or log the error from addCoinToPortfolio without letting it propagate to the outer catch block
+        console.error("Error adding coin to portfolio:", err);
+      }
     } catch (err) {
       console.error("Error calling contract:", err);
+      toast({
+        title: "Error",
+        description: "Error calling contract",
+        variant: "destructive",
+      });
     }
     console.log("token bought", uniswapPairs[currentIndex]);
+
+    setTokenBought(true);
   };
 
-  const skip = (currentIndex: number) => {
+  const skip = async (currentIndex: number) => {
     console.log("token skipped", uniswapPairs[currentIndex]);
+    setTokenBought(false);
   };
 
   const handleDragEnd = async (event: any, info: PanInfo) => {
@@ -56,7 +180,12 @@ export function SwipePage({ category }: { category: string }) {
         skip(currentIndex);
       }
       controls.set({ x: 0, opacity: 1 });
-      setCurrentIndex((prev) => (prev + 1) % uniswapPairs.length);
+
+      // Only increment if we have more tokens
+      if (currentIndex < uniswapPairs.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+      }
     } else {
       controls.start({ x: 0, opacity: 1 });
     }
@@ -85,9 +214,9 @@ export function SwipePage({ category }: { category: string }) {
           dragConstraints={{ left: 0, right: 0 }}
           onDragEnd={handleDragEnd}
           animate={controls}
-          className="touch-none"
+          className="touch-none flex justify-center"
         >
-          <TokenCard token={uniswapPairs[currentIndex]} />
+          <TokenCard token={currentToken} trustScore={trustScore} />
         </motion.div>
       </div>
     </div>
