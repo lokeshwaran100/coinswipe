@@ -109,45 +109,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     "0x349cd84F799711a21510165229e65A07fb74E413",
   ];
 
-  // // Fetch token profiles
-  // const fetchTokenProfiles = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       "https://api.dexscreener.com/token-profiles/latest/v1"
-  //     );
-  //     const data = await response.json();
-
-  //     // Filter profiles for base chain
-  //     const baseProfiles = data.filter(
-  //       (profile: TokenProfile) => profile.chainId === "base"
-  //     );
-
-  //     // Replace tokenAddress with custom addresses
-  //     let addressIndex = 0; // Start at the first address
-  //     const updatedProfiles = baseProfiles.map((profile: TokenProfile) => {
-  //       const updatedProfile = {
-  //         ...profile,
-  //         tokenAddress: customAddresses[addressIndex],
-  //       };
-  //       addressIndex = (addressIndex + 1) % customAddresses.length; // Cycle through addresses
-  //       return updatedProfile;
-  //     });
-
-  //     // Update state
-  //     setTokenProfiles(updatedProfiles);
-
-  //     // Extract and save token addresses
-  //     const addresses = updatedProfiles.map(
-  //       (profile: TokenProfile) => profile.tokenAddress
-  //     );
-  //     setBaseTokenAddresses((prev) => [...prev, ...addresses]);
-  //   } catch (err) {
-  //     console.error("Error fetching token profiles:", err);
-  //     setError(
-  //       err instanceof Error ? err.message : "Failed to fetch token profiles"
-  //     );
-  //   }
-  // };
+  // Fetch token profiles
   const fetchTokenProfiles = async () => {
     try {
       const response = await fetch(
@@ -159,13 +121,26 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       const baseProfiles = data.filter(
         (profile: TokenProfile) => profile.chainId === "base"
       );
-      setTokenProfiles(baseProfiles);
 
-      // Extract and save token addresses
-      const addresses = baseProfiles.map(
+      // Extract and save the existing token addresses before updating profiles
+      const existingAddresses = baseProfiles.map(
         (profile: TokenProfile) => profile.tokenAddress
       );
-      setBaseTokenAddresses(addresses);
+      setBaseTokenAddresses(existingAddresses);
+
+      // Now update the profiles with custom addresses
+      let addressIndex = 0; // Start at the first address
+      const updatedProfiles = baseProfiles.map((profile: TokenProfile) => {
+        const updatedProfile = {
+          ...profile,
+          tokenAddress: customAddresses[addressIndex], // Update tokenAddress
+        };
+        addressIndex = (addressIndex + 1) % customAddresses.length; // Cycle through addresses
+        return updatedProfile;
+      });
+
+      // Update state with the updated profiles
+      setTokenProfiles(updatedProfiles);
     } catch (err) {
       console.error("Error fetching token profiles:", err);
       setError(
@@ -173,6 +148,31 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       );
     }
   };
+  // const fetchTokenProfiles = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       "https://api.dexscreener.com/token-profiles/latest/v1"
+  //     );
+  //     const data = await response.json();
+
+  //     // Filter profiles for base chain
+  //     const baseProfiles = data.filter(
+  //       (profile: TokenProfile) => profile.chainId === "base"
+  //     );
+  //     setTokenProfiles(baseProfiles);
+
+  //     // Extract and save token addresses
+  //     const addresses = baseProfiles.map(
+  //       (profile: TokenProfile) => profile.tokenAddress
+  //     );
+  //     setBaseTokenAddresses(addresses);
+  //   } catch (err) {
+  //     console.error("Error fetching token profiles:", err);
+  //     setError(
+  //       err instanceof Error ? err.message : "Failed to fetch token profiles"
+  //     );
+  //   }
+  // };
 
   // Fetch token pairs data
   const fetchTokenPairs = async () => {

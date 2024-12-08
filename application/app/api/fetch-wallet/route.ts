@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
+// import { downloadAndDecrypt } from "@/lib/lit";
 // import seed from "";
 
 export async function POST(request: Request) {
   try {
+    const { addressToBuy } = await request.json(); // Extract addressToBuy from the request
     // Configure Coinbase SDK
     Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
@@ -24,6 +26,12 @@ export async function POST(request: Request) {
 
     // Fetch and parse the wallet data
 
+    // const getJsonString = async () => {
+    //   const uploadUrl = "";
+    //   const decryptedString = await downloadAndDecrypt(uploadUrl);
+    //   console.log("Decrypted data:", decryptedString);
+    // };
+
     const fetchedWallet = await Wallet.fetch(
       "3be99109-1d74-43bf-b36e-80fdb9fe8227"
     );
@@ -42,7 +50,7 @@ export async function POST(request: Request) {
     // const faucetTransaction = await wallet.faucet();
     // console.log(`Faucet transaction: ${faucetTransaction}`);
 
-      const approveInvocation = await wallet.invokeContract({
+    const approveInvocation = await wallet.invokeContract({
       contractAddress: "0x4200000000000000000000000000000000000006",
       method: "approve",
       args: {
@@ -88,7 +96,7 @@ export async function POST(request: Request) {
       contractAddress: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
       method: "swapETHToToken",
       args: {
-        _token: "0x5EdF9324539DaF9dFeff8E15c8A8ce813968C08e",
+        _token: addressToBuy,
         _ethAmount: "10000000000000",
         _minTokens: "39200",
       },
