@@ -58,7 +58,7 @@ export function OnboardingPage() {
         className="w-full max-w-md space-y-8 p-6 bg-card rounded-xl shadow-lg"
       >
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-primary">JustSwipe</h1>
+          <h1 className="text-4xl font-bold text-primary">CoinSwipe</h1>
           <p className="text-muted-foreground">Swipe your way to crypto success</p>
         </div>
 
