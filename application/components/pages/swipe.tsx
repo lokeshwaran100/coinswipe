@@ -125,6 +125,7 @@ export function SwipePage({ category }: { category: string }) {
 
       const data = await response.json();
 
+      console.log("data from the contract", data);
       if (!data.success) {
         throw new Error(data.error || "Contract call failed");
       }
@@ -133,23 +134,19 @@ export function SwipePage({ category }: { category: string }) {
       console.log(data);
 
       // GETTING THE LAST TX HASH by the user from subgraph
-      const address = (data as Data)?.swapETHToTokens[0].id;
-      console.log(address);
+      // const address = (data as Data)?.swapETHToTokens[0].id;
+      // console.log(address);
 
-      toast({
-        title: "Token bought",
-        description: `Successfully bought ${defaultAmount} ETH worth and here's tx hash link https://basescan.org/tx/${address}`,
-      });
-      try {
         await addCoinToPortfolio(
           session?.user?.email as string,
           uniswapPairs[currentIndex],
           defaultAmount
         );
-      } catch (err) {
-        // Handle or log the error from addCoinToPortfolio without letting it propagate to the outer catch block
-        console.error("Error adding coin to portfolio:", err);
-      }
+        toast({
+          title: "Token bought",
+          description: `Successfully bought ${defaultAmount} ETH worth`,
+        });
+
     } catch (err) {
       console.error("Error calling contract:", err);
       toast({
