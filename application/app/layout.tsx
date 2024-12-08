@@ -7,6 +7,7 @@ import { getSession } from 'next-auth/react'
 import Providers from '@/components/providers/provider'
 import { Toaster } from '@/components/ui/toaster'
 import SubProviders from "./Providers";
+import { Menu } from '@/components/ui/menu'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,10 +37,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Providers session={session?session:null}>
+          <Providers session={session ? session : null}>
             <TokenProvider>
-              <SubProviders>{children}</SubProviders>
-                            <Toaster />
+              <SubProviders>{children}   
+                <Toaster />           
+                <Menu />
+              </SubProviders>
             </TokenProvider>
           </Providers>
         </ThemeProvider>
