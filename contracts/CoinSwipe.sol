@@ -116,14 +116,15 @@ contract CoinSwipe is Ownable {
     ) external {
         require(_tokenAmount > 0, "Token amount required");
 
-        uint256 fee = (_tokenAmount * feePercentage) / 10000;
-        uint256 amountToSwap = _tokenAmount - fee;
+        // uint256 fee = (_tokenAmount * feePercentage) / 10000;
+        // uint256 amountToSwap = _tokenAmount - fee;
 
         // Transfer tokens to the contract
         IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
 
         // Approve Uniswap to spend tokens
-        IERC20(_token).approve(address(uniswapRouter), amountToSwap);
+        // IERC20(_token).approve(address(uniswapRouter), amountToSwap);
+        IERC20(_token).approve(address(uniswapRouter), _tokenAmount);
 
         // Perform the swap
         address[] memory path = new address[](2);
@@ -131,7 +132,8 @@ contract CoinSwipe is Ownable {
         path[1] = WETH;
 
         uniswapRouter.swapExactTokensForETH(
-            amountToSwap,
+            // amountToSwap,
+            _tokenAmount,
             _minETH,
             path,
             msg.sender,
@@ -139,7 +141,7 @@ contract CoinSwipe is Ownable {
         );
 
         // Send fee in ETH to the fee collection address
-        IERC20(_token).transfer(feeCollectionAddress, fee);
+        // IERC20(_token).transfer(feeCollectionAddress, fee);
 
         emit SwapTokenToETH(msg.sender, _tokenAmount, _token);
     }
