@@ -212,7 +212,7 @@ export function SwipePage({ category }: { category: string }) {
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600" />
+            {/* <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600" /> */}
             <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
               CoinSwipe
             </span>
