@@ -11,7 +11,7 @@ import { addCoinToPortfolio } from "@/lib/dbOperations";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { HfInference } from "@huggingface/inference";
-const inference = new HfInference("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");
+const inference = new HfInference(process.env.NEXT_PUBLIC_HUGGING_FACE_API);
 
 import { gql, request } from "graphql-request";
 const query = gql`
@@ -199,33 +199,89 @@ export function SwipePage({ category }: { category: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
-      <div className="max-w-lg mx-auto space-y-8">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#001F3F] via-[#1A1A2E] to-[#2D1B3D] relative">
+      {/* Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-6 bg-black/20 backdrop-blur-lg border-b border-white/10">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition"
+            className="flex items-center gap-2 text-gray-300 hover:text-white transition"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back
+            <span className="hidden md:inline">Back</span>
           </button>
 
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600" />
+            <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+              CoinSwipe
+            </span>
+          </div>
+
           <div className="flex gap-4">
-            <ThumbsDown className="w-6 h-6 text-red-500" />
-            <ThumbsUp className="w-6 h-6 text-green-500" />
+            <ThumbsDown className="w-6 h-6 text-red-400 animate-pulse" />
+            <ThumbsUp className="w-6 h-6 text-green-400 animate-pulse" />
           </div>
         </div>
-
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          onDragEnd={handleDragEnd}
-          animate={controls}
-          className="touch-none flex justify-center"
-        >
-          <TokenCard token={currentToken} trustScore={trustScore} />
-        </motion.div>
       </div>
+
+      {/* Loading States */}
+      {(!uniswapPairs.length && loading) && (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="space-y-4 text-center">
+            <div className="w-16 h-16 rounded-full border-4 border-t-blue-500 border-r-transparent animate-spin mx-auto"></div>
+            <p className="text-gray-400">Loading tokens...</p>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="bg-black/30 backdrop-blur-lg border border-red-500/20 rounded-xl p-6 text-center max-w-md mx-4">
+            <p className="text-red-400">Error: {error}</p>
+          </div>
+        </div>
+      )}
+
+      {(!uniswapPairs.length && !loading) && (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-xl p-6 text-center max-w-md mx-4">
+            <p className="text-gray-400">No tokens found in this category</p>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      {currentToken && (
+        <div className="min-h-screen pt-24 pb-12 px-4 md:px-6 flex items-center justify-center">
+          <div className="w-full max-w-lg mx-auto">
+            <motion.div
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              onDragEnd={handleDragEnd}
+              animate={controls}
+              className="touch-none flex justify-center relative"
+            >
+              {/* Swipe Instructions */}
+              <div className="absolute left-0 -translate-x-full hidden md:flex items-center gap-2 text-gray-400">
+                <ThumbsDown className="w-6 h-6" />
+                <span>Swipe left to skip</span>
+              </div>
+              <div className="absolute right-0 translate-x-full hidden md:flex items-center gap-2 text-gray-400">
+                <span>Swipe right to buy</span>
+                <ThumbsUp className="w-6 h-6" />
+              </div>
+
+              {/* Mobile Instructions */}
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 md:hidden text-gray-400 text-sm whitespace-nowrap">
+                Swipe left to skip, right to buy
+              </div>
+
+              <TokenCard token={currentToken} trustScore={trustScore} />
+            </motion.div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
