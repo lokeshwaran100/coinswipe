@@ -5,7 +5,7 @@ import { TokenPair } from '@/components/providers/token-provider'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TrustScore } from "../TrustScore";
-import { useEffect, useState } from "react";
+import { motion } from 'framer-motion';
 
 interface TokenCardProps {
   token: TokenPair;
@@ -29,37 +29,47 @@ export function TokenCard({ token, trustScore }: TokenCardProps) {
   const imageUrl = token.info?.imageUrl || "/placeholder-token.png";
 
   return (
-    <div className="w-full max-w-[320px] aspect-[3/4] rounded-xl bg-card p-6 shadow-lg hover:shadow-xl transition-all border border-border/5 backdrop-blur-sm relative">
-      <div className="absolute inset-y-0 -left-8 flex items-center text-muted-foreground/50">
+    <motion.div 
+      className="w-full max-w-[320px] aspect-[3/4] rounded-2xl bg-black/30 backdrop-blur-lg p-6 md:p-8 border border-white/10 shadow-xl relative"
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      {/* Swipe Indicators */}
+      <div className="absolute inset-y-0 -left-8 flex items-center text-red-400/50">
         <ChevronsLeft className="w-10 h-10 animate-pulse" />
       </div>
-      <div className="absolute inset-y-0 -right-8 flex items-center text-muted-foreground/50">
+      <div className="absolute inset-y-0 -right-8 flex items-center text-green-400/50">
         <ChevronsRight className="w-10 h-10 animate-pulse" />
       </div>
 
       <div className="flex flex-col items-center justify-center gap-6">
-        <div className="relative w-32 h-32">
+        {/* Token Image */}
+        <div className="relative w-28 h-28 md:w-32 md:h-32">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-2xl blur-xl opacity-50" />
           <Image
             src={imageUrl}
             alt={token.baseToken.name}
-            className="rounded-2xl object-cover"
+            className="rounded-2xl object-cover relative"
             fill
-            sizes="128px"
+            sizes="(max-width: 768px) 112px, 128px"
           />
         </div>
 
-        <div className="w-full text-center space-y-2">
+        {/* Token Info */}
+        <div className="w-full text-center space-y-3">
           <div>
-            <h3 className="text-2xl font-bold">{token.baseToken.name}</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-xl md:text-2xl font-bold text-white">{token.baseToken.name}</h3>
+            <p className="text-sm text-gray-400">
               {token.baseToken.symbol}
             </p>
           </div>
+          
           <TrustScore score={trustScore} className="justify-center" />
-          <div className="flex items-center justify-center gap-4">
+          
+          <div className="flex items-center justify-center gap-4 bg-white/5 rounded-xl p-3">
             <div>
-              <p className="text-sm text-muted-foreground">Price</p>
-              <p className="text-lg font-semibold">
+              <p className="text-sm text-gray-400">Price</p>
+              <p className="text-lg font-semibold text-white">
                 ${parseFloat(token.priceUsd).toFixed(6)}
               </p>
             </div>
@@ -67,7 +77,7 @@ export function TokenCard({ token, trustScore }: TokenCardProps) {
             {token.priceChange && (
               <div
                 className={`flex items-center gap-1 ${
-                  isPositive ? "text-green-500" : "text-red-500"
+                  isPositive ? "text-green-400" : "text-red-400"
                 }`}
               >
                 {isPositive ? (
@@ -84,43 +94,45 @@ export function TokenCard({ token, trustScore }: TokenCardProps) {
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-6">
+      {/* Token Stats */}
+      <div className="mt-6 md:mt-8 grid grid-cols-2 gap-4 md:gap-6">
         {token.liquidity && (
-          <div>
-            <p className="text-sm text-muted-foreground">Liquidity</p>
-            <p className="font-semibold">{formatNumber(token.liquidity.usd)}</p>
+          <div className="bg-white/5 rounded-xl p-3">
+            <p className="text-sm text-gray-400">Liquidity</p>
+            <p className="font-semibold text-white">{formatNumber(token.liquidity.usd)}</p>
           </div>
         )}
         {token.marketCap && (
-          <div>
-            <p className="text-sm text-muted-foreground">Market Cap</p>
-            <p className="font-semibold">{formatNumber(token.marketCap)}</p>
+          <div className="bg-white/5 rounded-xl p-3">
+            <p className="text-sm text-gray-400">Market Cap</p>
+            <p className="font-semibold text-white">{formatNumber(token.marketCap)}</p>
           </div>
         )}
         {token.fdv && (
-          <div>
-            <p className="text-sm text-muted-foreground">FDV</p>
-            <p className="font-semibold">{formatNumber(token.fdv)}</p>
+          <div className="bg-white/5 rounded-xl p-3">
+            <p className="text-sm text-gray-400">FDV</p>
+            <p className="font-semibold text-white">{formatNumber(token.fdv)}</p>
           </div>
         )}
         {token.pairCreatedAt && (
-          <div>
-            <p className="text-sm text-muted-foreground">Created</p>
-            <p className="font-semibold">
+          <div className="bg-white/5 rounded-xl p-3">
+            <p className="text-sm text-gray-400">Created</p>
+            <p className="font-semibold text-white">
               {new Date(token.pairCreatedAt * 1000).toLocaleDateString()}
             </p>
           </div>
         )}
       </div>
 
-      <div className="mt-auto pt-8">
+      {/* Links */}
+      <div className="mt-6 md:mt-8">
         <div className="flex gap-3 justify-center">
           {token.info?.websites?.[0] && (
             <Link
               href={token.info.websites[0].url}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400/10 via-blue-500/10 to-purple-600/10 hover:from-cyan-400/20 hover:via-blue-500/20 hover:to-purple-600/20 text-white border border-white/10 transition-all duration-300 flex items-center gap-2"
             >
               <LinkIcon className="w-4 h-4" />
               Website
@@ -131,7 +143,7 @@ export function TokenCard({ token, trustScore }: TokenCardProps) {
               href={token.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400/10 via-blue-500/10 to-purple-600/10 hover:from-cyan-400/20 hover:via-blue-500/20 hover:to-purple-600/20 text-white border border-white/10 transition-all duration-300 flex items-center gap-2"
             >
               <LinkIcon className="w-4 h-4" />
               DexScreener
@@ -139,6 +151,6 @@ export function TokenCard({ token, trustScore }: TokenCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -57,7 +57,8 @@ export async function POST(request: Request) {
 
     // if (buy) {
     const approveInvocation = await wallet.invokeContract({
-      contractAddress: "0x4200000000000000000000000000000000000006",
+      // contractAddress: "0x4200000000000000000000000000000000000006",
+      contractAddress: addressOfToken,
       method: "approve",
       args: {
         guy: "0xB0bBF6Ae80656CE0647Ea70196E6F445B7eBec59",
@@ -98,13 +99,13 @@ export async function POST(request: Request) {
     console.log(appResult);
 
     // Execute the contract call
-    const buyInvocation = await wallet.invokeContract({
+    const sellInvocation = await wallet.invokeContract({
       contractAddress: "0xB0bBF6Ae80656CE0647Ea70196E6F445B7eBec59",
-      method: "swapETHToToken",
+      method: "swapTokenToETH",
       args: {
         _token: addressOfToken as string,
-        _ethAmount: "10000000000000",
-        _minTokens: "39200",
+        _ethAmount: "189400000000",
+        _minTokens: "0",
       },
       abi: [
         {
@@ -116,12 +117,12 @@ export async function POST(request: Request) {
             },
             {
               internalType: "uint256",
-              name: "_ethAmount",
+              name: "_tokenAmount",
               type: "uint256",
             },
             {
               internalType: "uint256",
-              name: "_minTokens",
+              name: "_minETH",
               type: "uint256",
             },
           ],
@@ -162,7 +163,7 @@ export async function POST(request: Request) {
     // Get the result from the invocation
     // const depositResult = await depositInvocation.wait();
 
-    const result = await buyInvocation.wait();
+    const result = await sellInvocation.wait();
     console.log(result);
     // }
 
