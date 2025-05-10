@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
-import { decimals } from "thirdweb/extensions/erc20";
-import { ethers } from "ethers";
+import { parseEther } from "ethers";
+// import { downloadAndDecrypt } from "@/lib/lit";
+// import seed from "";
 
 export async function POST(request: Request) {
   try {
-    const { addressOfToken, tokenAmount } = await request.json(); // Extract addressToBuy from the request
+    const { addressOfToken, ethAmount } = await request.json(); // Extract addressToBuy from the request
     // Configure Coinbase SDK
     const apiKeyName =
       "organizations/34030d3c-581b-4d96-92a6-6fd0dd21e969/apiKeys/f7fdffbf-b65d-4f22-b2b7-3a340a8541cb";
@@ -21,15 +22,19 @@ export async function POST(request: Request) {
       "3be99109-1d74-43bf-b36e-80fdb9fe8227"
     );
 
+    // You can now load the seed into the wallet from the local file.
+    // fetchedWallet will be equivalent to importedWallet.
     await fetchedWallet.loadSeed(filePath);
 
+    // importedWallet will be equivalent to wallet.
     let wallet = fetchedWallet;
+    // Get default address as string
     const address = await wallet.getDefaultAddress();
     const walletAddress = address.toString();
     console.log(walletAddress);
 
     const approveInvocation = await wallet.invokeContract({
-      contractAddress: addressOfToken,
+      contractAddress: "0x4200000000000000000000000000000000000006",
       method: "approve",
       args: {
         guy: "0xd9145CCE52D386f254917e481eB44e9943F39138",
@@ -68,16 +73,14 @@ export async function POST(request: Request) {
     const appResult = await approveInvocation.wait();
     console.log(appResult);
 
-    const tokenDecimals = await decimals({ contract: addressOfToken });
-
     // Execute the contract call
-    const sellInvocation = await wallet.invokeContract({
+    const buyInvocation = await wallet.invokeContract({
       contractAddress: "0xd9145CCE52D386f254917e481eB44e9943F39138",
-      method: "swapTokenToETH",
+      method: "swapETHToToken",
       args: {
         _token: addressOfToken as string,
-        _tokenAmount: ethers.parseUnits(tokenAmount, tokenDecimals),
-        _minETH: "0",
+        _ethAmount: parseEther(ethAmount).toString(),
+        _minTokens: "39200",
       },
       abi: [
         {
@@ -89,12 +92,12 @@ export async function POST(request: Request) {
             },
             {
               internalType: "uint256",
-              name: "_tokenAmount",
+              name: "_ethAmount",
               type: "uint256",
             },
             {
               internalType: "uint256",
-              name: "_minETH",
+              name: "_minTokens",
               type: "uint256",
             },
           ],
@@ -105,9 +108,10 @@ export async function POST(request: Request) {
           type: "function",
         },
       ],
+      // amount: 1000000000000,
     });
 
-    const result = await sellInvocation.wait();
+    const result = await buyInvocation.wait();
     console.log(result);
 
     return NextResponse.json({

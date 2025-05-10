@@ -115,12 +115,13 @@ export function SwipePage({ category }: { category: string }) {
       const currentToken = tokenProfiles[currentIndex];
 
       const addressOfToken = currentToken.tokenAddress;
-      const response = await fetch("/api/fetch-wallet", {
+      const response = await fetch("/api/buy", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ addressOfToken }), // Send addressToBuy as part of the request body
+        // TODO: use the default amount set by the user instead of 0.001
+        body: JSON.stringify({ addressOfToken, ethAmount: "0.00001" }), // Send addressToBuy as part of the request body
       });
 
       const dataa = await response.json();
