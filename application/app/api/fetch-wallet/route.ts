@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       contractAddress: "0x4200000000000000000000000000000000000006",
       method: "approve",
       args: {
-        guy: "0xB0bBF6Ae80656CE0647Ea70196E6F445B7eBec59",
+        guy: "0xd9145CCE52D386f254917e481eB44e9943F39138",
         wad: "10000000000000",
       },
       abi: [
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 
     // Execute the contract call
     const buyInvocation = await wallet.invokeContract({
-      contractAddress: "0xB0bBF6Ae80656CE0647Ea70196E6F445B7eBec59",
+      contractAddress: "0xd9145CCE52D386f254917e481eB44e9943F39138",
       method: "swapETHToToken",
       args: {
         _token: addressOfToken as string,
@@ -171,7 +171,7 @@ export async function POST(request: Request) {
     //     contractAddress: "0x5EdF9324539DaF9dFeff8E15c8A8ce813968C08e",
     //     method: "approve",
     //     args: {
-    //       guy: "0xB0bBF6Ae80656CE0647Ea70196E6F445B7eBec59",
+    //       guy: "0xd9145CCE52D386f254917e481eB44e9943F39138",
     //       wad: "600000000000000000000000000",
     //     },
     //     abi: [
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
     //     contractAddress: "0x42C98f2e8d7d6c9E39d62bFA70C6F05CfcA94026",
     //     method: "swapTokenToETH",
     //     args: {
-    //       _token: "0xB0bBF6Ae80656CE0647Ea70196E6F445B7eBec59",
+    //       _token: "0xd9145CCE52D386f254917e481eB44e9943F39138",
     //       _tokenAmount: "600000000000000000",
     //       _minETH: "39200",
     //     },
